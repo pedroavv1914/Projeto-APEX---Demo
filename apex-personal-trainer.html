@@ -1,0 +1,1290 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>APEX — Personal Training</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Playfair+Display:ital,wght@0,700;1,400;1,700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+
+:root {
+  --ink: #0C0C0C;
+  --ink-2: #181818;
+  --ink-3: #242424;
+  --paper: #F2EDE6;
+  --paper-2: #E8E2D9;
+  --fire: #E8390E;
+  --fire-dim: rgba(232,57,14,0.12);
+  --gold: #C9A84C;
+  --muted: #6B6560;
+  --ff-display: 'Bebas Neue', sans-serif;
+  --ff-serif: 'Playfair Display', serif;
+  --ff-body: 'DM Sans', sans-serif;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--ff-body);
+  font-weight: 300;
+  overflow-x: hidden;
+  cursor: none;
+}
+
+/* CUSTOM CURSOR */
+.cursor {
+  width: 12px; height: 12px;
+  background: var(--fire);
+  border-radius: 50%;
+  position: fixed;
+  top: 0; left: 0;
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+  transition: transform 0.1s, width 0.2s, height 0.2s, background 0.2s;
+  mix-blend-mode: normal;
+}
+.cursor-ring {
+  width: 36px; height: 36px;
+  border: 1px solid rgba(232,57,14,0.5);
+  border-radius: 50%;
+  position: fixed;
+  top: 0; left: 0;
+  pointer-events: none;
+  z-index: 9998;
+  transform: translate(-50%, -50%);
+  transition: transform 0.08s, width 0.25s, height 0.25s, border-color 0.2s;
+}
+body:hover .cursor { opacity: 1; }
+
+/* NOISE OVERLAY */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 1000;
+  opacity: 0.4;
+}
+
+/* NAV */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.4rem 3.5rem;
+  mix-blend-mode: normal;
+}
+nav::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(12,12,12,0.9) 0%, transparent 100%);
+  z-index: -1;
+}
+
+.nav-logo {
+  font-family: var(--ff-display);
+  font-size: 2rem;
+  letter-spacing: 0.15em;
+  color: var(--paper);
+  line-height: 1;
+}
+.nav-logo em {
+  color: var(--fire);
+  font-style: normal;
+}
+
+.nav-center {
+  display: flex;
+  gap: 3rem;
+  list-style: none;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.nav-center a {
+  font-family: var(--ff-body);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(242,237,230,0.5);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.nav-center a:hover { color: var(--paper); }
+
+.nav-cta {
+  font-family: var(--ff-display);
+  font-size: 0.95rem;
+  letter-spacing: 0.12em;
+  padding: 0.55rem 1.8rem;
+  background: var(--fire);
+  color: var(--paper);
+  border: none;
+  cursor: none;
+  transition: background 0.2s;
+}
+.nav-cta:hover { background: #c42e0a; }
+
+/* HERO */
+.hero {
+  min-height: 100vh;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  position: relative;
+  overflow: hidden;
+  padding: 0 3.5rem 4rem;
+}
+
+/* BIG BG TEXT */
+.hero-bg-text {
+  position: absolute;
+  bottom: -0.15em;
+  left: -0.02em;
+  font-family: var(--ff-display);
+  font-size: clamp(14rem, 28vw, 26rem);
+  line-height: 1;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(242,237,230,0.05);
+  white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
+  letter-spacing: 0.02em;
+}
+
+/* DIAGONAL LINE */
+.hero::before {
+  content: '';
+  position: absolute;
+  top: 0; right: 22%;
+  width: 1px;
+  height: 100%;
+  background: linear-gradient(to bottom, transparent, rgba(232,57,14,0.3) 30%, rgba(232,57,14,0.3) 70%, transparent);
+}
+
+.hero-content {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: end;
+  padding-top: 40vh;
+  gap: 2rem;
+  position: relative;
+  z-index: 2;
+}
+
+.hero-headline {
+  font-family: var(--ff-display);
+  font-size: clamp(5rem, 14vw, 13rem);
+  line-height: 0.85;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+}
+.hero-headline .line-2 {
+  display: block;
+  color: transparent;
+  -webkit-text-stroke: 2px var(--paper);
+  padding-left: 0.5em;
+}
+.hero-headline .line-3 {
+  display: block;
+  color: var(--fire);
+  font-style: normal;
+  padding-left: 1em;
+}
+
+.hero-side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1.5rem;
+  padding-bottom: 0.5rem;
+  max-width: 260px;
+}
+
+.hero-tag {
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--fire);
+  border: 1px solid var(--fire);
+  padding: 0.35rem 0.9rem;
+  display: inline-block;
+}
+
+.hero-sub {
+  font-size: 0.88rem;
+  line-height: 1.8;
+  color: rgba(242,237,230,0.55);
+  text-align: right;
+}
+
+.hero-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  z-index: 2;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(242,237,230,0.1);
+}
+
+.hero-stats {
+  display: flex;
+  gap: 3.5rem;
+}
+.stat {
+  text-align: center;
+}
+.stat-n {
+  font-family: var(--ff-display);
+  font-size: 2.8rem;
+  color: var(--paper);
+  line-height: 1;
+  display: block;
+}
+.stat-n span { color: var(--fire); }
+.stat-l {
+  font-size: 0.65rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-top: 0.2rem;
+  display: block;
+}
+
+.hero-btn-group { display: flex; gap: 1rem; }
+
+.btn-fire {
+  font-family: var(--ff-display);
+  font-size: 1.05rem;
+  letter-spacing: 0.1em;
+  padding: 0.9rem 2.5rem;
+  background: var(--fire);
+  color: var(--paper);
+  border: none;
+  cursor: none;
+  position: relative;
+  overflow: hidden;
+  transition: background 0.2s;
+}
+.btn-fire::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+  transition: left 0.4s;
+}
+.btn-fire:hover { background: #c42e0a; }
+.btn-fire:hover::after { left: 150%; }
+
+.btn-outline {
+  font-family: var(--ff-display);
+  font-size: 1.05rem;
+  letter-spacing: 0.1em;
+  padding: 0.9rem 2.5rem;
+  background: transparent;
+  color: var(--paper);
+  border: 1px solid rgba(242,237,230,0.25);
+  cursor: none;
+  transition: border-color 0.2s, color 0.2s;
+}
+.btn-outline:hover { border-color: var(--fire); color: var(--fire); }
+
+/* MARQUEE */
+.marquee-wrap {
+  background: var(--fire);
+  overflow: hidden;
+  white-space: nowrap;
+  padding: 0.7rem 0;
+}
+.marquee-track {
+  display: inline-flex;
+  animation: marquee 22s linear infinite;
+}
+.marquee-item {
+  font-family: var(--ff-display);
+  font-size: 0.9rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--paper);
+  padding: 0 2.5rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 2.5rem;
+}
+.marquee-item::after {
+  content: '✦';
+  font-size: 0.5rem;
+  opacity: 0.7;
+}
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+/* SECTION COMMON */
+.s { padding: 7rem 3.5rem; }
+.s-label {
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--fire);
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.s-label::before {
+  content: '';
+  width: 28px; height: 1px;
+  background: var(--fire);
+}
+
+/* SERVICES */
+.services { background: var(--ink-2); }
+
+.services-header {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: end;
+  margin-bottom: 5rem;
+}
+
+.services-title {
+  font-family: var(--ff-display);
+  font-size: clamp(3rem, 6vw, 5.5rem);
+  line-height: 0.9;
+  letter-spacing: 0.02em;
+}
+.services-title em {
+  font-family: var(--ff-serif);
+  font-style: italic;
+  color: var(--gold);
+  font-size: 0.85em;
+}
+
+.services-intro {
+  font-size: 0.9rem;
+  line-height: 1.85;
+  color: rgba(242,237,230,0.5);
+  align-self: end;
+  max-width: 380px;
+}
+
+.services-list {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border: 1px solid rgba(242,237,230,0.08);
+}
+
+.svc {
+  padding: 2.5rem 2rem;
+  border-right: 1px solid rgba(242,237,230,0.08);
+  position: relative;
+  overflow: hidden;
+  transition: background 0.3s;
+}
+.svc:last-child { border-right: none; }
+.svc::before {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0;
+  width: 0; height: 2px;
+  background: var(--fire);
+  transition: width 0.4s cubic-bezier(0.16,1,0.3,1);
+}
+.svc:hover { background: var(--ink-3); }
+.svc:hover::before { width: 100%; }
+
+.svc-num {
+  font-family: var(--ff-display);
+  font-size: 3.5rem;
+  color: rgba(242,237,230,0.06);
+  line-height: 1;
+  margin-bottom: 1.5rem;
+  letter-spacing: 0.02em;
+}
+.svc-icon {
+  font-size: 1.6rem;
+  margin-bottom: 1.2rem;
+  display: block;
+}
+.svc-name {
+  font-family: var(--ff-display);
+  font-size: 1.4rem;
+  letter-spacing: 0.06em;
+  margin-bottom: 0.8rem;
+}
+.svc-desc {
+  font-size: 0.83rem;
+  line-height: 1.75;
+  color: rgba(242,237,230,0.45);
+}
+
+/* RESULTS — ASYMMETRIC */
+.results { background: var(--ink); position: relative; overflow: hidden; }
+.results::before {
+  content: 'RESULTS';
+  position: absolute;
+  right: -0.05em;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: var(--ff-display);
+  font-size: clamp(8rem, 16vw, 15rem);
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(242,237,230,0.03);
+  pointer-events: none;
+  line-height: 1;
+}
+
+.results-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 6rem;
+  align-items: center;
+  position: relative;
+  z-index: 2;
+}
+
+.results-numbers { display: flex; flex-direction: column; gap: 0; }
+
+.result-row {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  padding: 2rem 0;
+  border-bottom: 1px solid rgba(242,237,230,0.07);
+  position: relative;
+}
+.result-row:first-child { border-top: 1px solid rgba(242,237,230,0.07); }
+.result-row::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 0;
+  background: var(--fire-dim);
+  transition: width 0.5s cubic-bezier(0.16,1,0.3,1);
+  z-index: -1;
+}
+.result-row:hover::before { width: 100%; }
+
+.result-val {
+  font-family: var(--ff-display);
+  font-size: clamp(3rem, 6vw, 5rem);
+  color: var(--fire);
+  line-height: 1;
+  min-width: 140px;
+}
+.result-info strong {
+  display: block;
+  font-family: var(--ff-display);
+  font-size: 1rem;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.3rem;
+  color: var(--paper);
+}
+.result-info p { font-size: 0.8rem; line-height: 1.6; color: var(--muted); }
+
+/* METHOD CARD */
+.method-card {
+  background: var(--ink-2);
+  border: 1px solid rgba(232,57,14,0.15);
+  padding: 2.5rem;
+  position: relative;
+}
+.method-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--fire), var(--gold));
+}
+
+.method-step {
+  display: flex;
+  gap: 1.2rem;
+  padding: 1.2rem 0;
+  border-bottom: 1px solid rgba(242,237,230,0.06);
+  align-items: flex-start;
+}
+.method-step:last-child { border-bottom: none; }
+.step-n {
+  font-family: var(--ff-serif);
+  font-style: italic;
+  font-size: 1.6rem;
+  color: var(--fire);
+  min-width: 32px;
+  line-height: 1;
+}
+.step-text strong {
+  display: block;
+  font-family: var(--ff-display);
+  font-size: 0.95rem;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.25rem;
+}
+.step-text p { font-size: 0.78rem; color: var(--muted); line-height: 1.6; }
+
+/* TESTIMONIALS */
+.testimonials { background: var(--paper); }
+.testimonials .s-label { color: var(--fire); }
+.testimonials .s-label::before { background: var(--fire); }
+
+.testimonials-title {
+  font-family: var(--ff-display);
+  font-size: clamp(3rem, 7vw, 6rem);
+  color: var(--ink);
+  line-height: 0.9;
+  letter-spacing: 0.02em;
+  margin-bottom: 4rem;
+}
+.testimonials-title em {
+  font-family: var(--ff-serif);
+  font-style: italic;
+  color: var(--fire);
+}
+
+.testi-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.testi {
+  background: white;
+  padding: 2rem;
+  position: relative;
+  border-top: 3px solid transparent;
+  transition: border-color 0.2s;
+}
+.testi:hover { border-color: var(--fire); }
+.testi.big { background: var(--ink); color: var(--paper); }
+
+.testi-quote {
+  font-family: var(--ff-serif);
+  font-style: italic;
+  font-size: 1.5rem;
+  color: rgba(12,12,12,0.08);
+  line-height: 1;
+  margin-bottom: 0.5rem;
+}
+.testi.big .testi-quote { color: rgba(242,237,230,0.08); }
+
+.stars { color: var(--fire); font-size: 0.75rem; letter-spacing: 0.15em; margin-bottom: 1rem; }
+
+.testi-text {
+  font-size: 0.88rem;
+  line-height: 1.75;
+  color: #333;
+  margin-bottom: 1.5rem;
+  font-style: italic;
+}
+.testi.big .testi-text { color: rgba(242,237,230,0.7); }
+
+.testi-author {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border-top: 1px solid rgba(0,0,0,0.06);
+  padding-top: 1rem;
+}
+.testi.big .testi-author { border-color: rgba(242,237,230,0.1); }
+
+.av {
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--ff-display);
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}
+.av-fire { background: rgba(232,57,14,0.15); color: var(--fire); }
+.av-gold { background: rgba(201,168,76,0.15); color: var(--gold); }
+.av-ink { background: var(--ink); color: var(--paper); }
+.av-paper { background: var(--paper); color: var(--ink); }
+
+.author-name { font-family: var(--ff-display); font-size: 0.9rem; letter-spacing: 0.06em; color: var(--ink); }
+.testi.big .author-name { color: var(--paper); }
+.author-meta { font-size: 0.72rem; color: #999; }
+.testi.big .author-meta { color: rgba(242,237,230,0.4); }
+
+/* PLANS */
+.plans { background: var(--ink-2); }
+
+.plans-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 4rem;
+}
+.plans-title {
+  font-family: var(--ff-display);
+  font-size: clamp(3rem, 6vw, 5.5rem);
+  line-height: 0.9;
+  letter-spacing: 0.02em;
+}
+.plans-title em {
+  font-family: var(--ff-serif);
+  font-style: italic;
+  color: var(--gold);
+  display: block;
+  font-size: 0.8em;
+}
+
+.plans-note {
+  font-size: 0.8rem;
+  color: var(--muted);
+  max-width: 220px;
+  text-align: right;
+  line-height: 1.7;
+}
+
+.plans-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+
+.plan {
+  background: var(--ink-3);
+  border: 1px solid rgba(242,237,230,0.07);
+  padding: 2.5rem 2rem;
+  position: relative;
+  transition: transform 0.25s, border-color 0.25s;
+}
+.plan:hover { transform: translateY(-6px); border-color: rgba(232,57,14,0.3); }
+
+.plan.hot {
+  background: var(--ink);
+  border: 1px solid var(--fire);
+}
+.plan.hot::after {
+  content: 'MAIS POPULAR';
+  position: absolute;
+  top: -1px; left: 50%;
+  transform: translateX(-50%) translateY(-100%);
+  font-family: var(--ff-display);
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  background: var(--fire);
+  color: var(--paper);
+  padding: 0.3rem 1.2rem;
+  white-space: nowrap;
+}
+
+.plan-tier {
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 1.5rem;
+}
+
+.plan-price {
+  font-family: var(--ff-display);
+  font-size: 3.8rem;
+  line-height: 1;
+  color: var(--paper);
+  margin-bottom: 0.2rem;
+}
+.plan-price sup {
+  font-size: 1.4rem;
+  vertical-align: super;
+  color: var(--fire);
+}
+
+.plan-cycle {
+  font-size: 0.75rem;
+  color: var(--muted);
+  margin-bottom: 2rem;
+}
+
+.plan-divider {
+  border: none;
+  border-top: 1px solid rgba(242,237,230,0.07);
+  margin-bottom: 1.5rem;
+}
+
+.plan-features {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+}
+.plan-features li {
+  font-size: 0.82rem;
+  color: rgba(242,237,230,0.6);
+  padding-left: 1.2rem;
+  position: relative;
+  line-height: 1.5;
+}
+.plan-features li::before {
+  content: '—';
+  position: absolute;
+  left: 0;
+  color: var(--fire);
+  font-size: 0.7rem;
+}
+
+.btn-plan-fire {
+  width: 100%;
+  font-family: var(--ff-display);
+  font-size: 0.95rem;
+  letter-spacing: 0.1em;
+  padding: 0.85rem;
+  background: var(--fire);
+  color: var(--paper);
+  border: none;
+  cursor: none;
+  transition: background 0.2s;
+}
+.btn-plan-fire:hover { background: #c42e0a; }
+
+.btn-plan-ghost {
+  width: 100%;
+  font-family: var(--ff-display);
+  font-size: 0.95rem;
+  letter-spacing: 0.1em;
+  padding: 0.85rem;
+  background: transparent;
+  color: var(--paper);
+  border: 1px solid rgba(242,237,230,0.15);
+  cursor: none;
+  transition: border-color 0.2s, color 0.2s;
+}
+.btn-plan-ghost:hover { border-color: var(--fire); color: var(--fire); }
+
+/* CTA */
+.cta-section {
+  background: var(--ink);
+  padding: 9rem 3.5rem;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 4rem;
+  position: relative;
+  overflow: hidden;
+}
+.cta-section::before {
+  content: '';
+  position: absolute;
+  left: 50%; top: 50%;
+  transform: translate(-50%, -50%);
+  width: 700px; height: 700px;
+  background: radial-gradient(circle, rgba(232,57,14,0.08) 0%, transparent 65%);
+  pointer-events: none;
+}
+
+.cta-title {
+  font-family: var(--ff-display);
+  font-size: clamp(3.5rem, 8vw, 8rem);
+  line-height: 0.85;
+  letter-spacing: 0.01em;
+  position: relative;
+  z-index: 2;
+}
+.cta-title em {
+  color: var(--fire);
+  font-style: normal;
+}
+.cta-title .outline {
+  -webkit-text-stroke: 2px var(--paper);
+  color: transparent;
+}
+
+.cta-right {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  align-items: flex-start;
+  position: relative;
+  z-index: 2;
+  min-width: 280px;
+}
+.cta-sub {
+  font-size: 0.88rem;
+  line-height: 1.8;
+  color: rgba(242,237,230,0.5);
+}
+
+/* FOOTER */
+footer {
+  background: var(--ink-2);
+  border-top: 1px solid rgba(242,237,230,0.06);
+  padding: 2rem 3.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.footer-logo {
+  font-family: var(--ff-display);
+  font-size: 1.5rem;
+  letter-spacing: 0.15em;
+  color: var(--paper);
+}
+.footer-logo em { color: var(--fire); font-style: normal; }
+footer p { font-size: 0.72rem; color: #444; letter-spacing: 0.05em; }
+
+/* REVEAL ANIMATIONS */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.reveal.in { opacity: 1; transform: translateY(0); }
+.d1 { transition-delay: 0.1s; }
+.d2 { transition-delay: 0.2s; }
+.d3 { transition-delay: 0.3s; }
+.d4 { transition-delay: 0.4s; }
+
+/* HERO ANIMATIONS */
+@keyframes slideUp {
+  from { opacity:0; transform: translateY(40px); }
+  to { opacity:1; transform: translateY(0); }
+}
+.hero-content { animation: slideUp 0.9s cubic-bezier(0.16,1,0.3,1) 0.2s both; }
+.hero-bottom { animation: slideUp 0.9s cubic-bezier(0.16,1,0.3,1) 0.5s both; }
+.hero-bg-text { animation: slideUp 1.2s cubic-bezier(0.16,1,0.3,1) 0.1s both; }
+
+/* RESPONSIVE */
+@media (max-width: 960px) {
+  nav { padding: 1rem 1.5rem; }
+  .nav-center, .nav-cta { display: none; }
+  .hero { padding: 0 1.5rem 3rem; }
+  .hero-content { grid-template-columns: 1fr; padding-top: 35vw; }
+  .hero-side { align-items: flex-start; max-width: 100%; }
+  .hero-sub { text-align: left; }
+  .hero-bottom { flex-direction: column; gap: 2rem; align-items: flex-start; }
+  .hero-stats { gap: 2rem; }
+  .s { padding: 4rem 1.5rem; }
+  .services-header { grid-template-columns: 1fr; }
+  .services-list { grid-template-columns: 1fr; }
+  .svc { border-right: none; border-bottom: 1px solid rgba(242,237,230,0.08); }
+  .results-grid { grid-template-columns: 1fr; gap: 3rem; }
+  .testi-grid { grid-template-columns: 1fr; }
+  .plans-grid { grid-template-columns: 1fr; }
+  .plans-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
+  .plans-note { text-align: left; }
+  .cta-section { grid-template-columns: 1fr; padding: 5rem 1.5rem; }
+  footer { flex-direction: column; gap: 1rem; text-align: center; padding: 2rem 1.5rem; }
+  body { cursor: auto; }
+  .cursor, .cursor-ring { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="ring"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">AP<em>E</em>X</div>
+  <ul class="nav-center">
+    <li><a href="#services">Serviços</a></li>
+    <li><a href="#results">Resultados</a></li>
+    <li><a href="#plans">Planos</a></li>
+    <li><a href="#testimonials">Depoimentos</a></li>
+  </ul>
+  <button class="nav-cta">Começar agora</button>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg-text">APEX</div>
+
+  <div class="hero-content">
+    <div>
+      <h1 class="hero-headline">
+        <span>TREINE</span>
+        <span class="line-2">DIFERENTE.</span>
+        <span class="line-3">VENÇA.</span>
+      </h1>
+    </div>
+    <div class="hero-side">
+      <span class="hero-tag">Personal Training</span>
+      <p class="hero-sub">Treinamento que respeita seu corpo, seu tempo e sua ambição. Resultado real, do início ao fim.</p>
+    </div>
+  </div>
+
+  <div class="hero-bottom">
+    <div class="hero-stats">
+      <div class="stat">
+        <span class="stat-n" id="sn1">0<span>+</span></span>
+        <span class="stat-l">Alunos ativos</span>
+      </div>
+      <div class="stat">
+        <span class="stat-n" id="sn2">0<span>+</span></span>
+        <span class="stat-l">Anos de experiência</span>
+      </div>
+      <div class="stat">
+        <span class="stat-n" id="sn3">0<span>%</span></span>
+        <span class="stat-l">Taxa de satisfação</span>
+      </div>
+      <div class="stat">
+        <span class="stat-n" id="sn4">0</span>
+        <span class="stat-l">Transformações</span>
+      </div>
+    </div>
+    <div class="hero-btn-group">
+      <button class="btn-fire">Quero começar →</button>
+      <button class="btn-outline">Ver planos</button>
+    </div>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-wrap" aria-hidden="true">
+  <div class="marquee-track">
+    <span class="marquee-item">Treino presencial</span>
+    <span class="marquee-item">Consultoria online</span>
+    <span class="marquee-item">Plano nutricional</span>
+    <span class="marquee-item">Avaliação física</span>
+    <span class="marquee-item">Resultados reais</span>
+    <span class="marquee-item">+200 alunos</span>
+    <span class="marquee-item">Treino presencial</span>
+    <span class="marquee-item">Consultoria online</span>
+    <span class="marquee-item">Plano nutricional</span>
+    <span class="marquee-item">Avaliação física</span>
+    <span class="marquee-item">Resultados reais</span>
+    <span class="marquee-item">+200 alunos</span>
+  </div>
+</div>
+
+<!-- SERVICES -->
+<section class="s services" id="services">
+  <div class="s-label">O que ofereço</div>
+  <div class="services-header">
+    <h2 class="services-title reveal">
+      SERVIÇOS<br>
+      <em>feitos pra você</em><br>
+      EVOLUIR
+    </h2>
+    <p class="services-intro reveal d1">Cada pessoa chega com uma história diferente. Cada protocolo parte desse princípio — sem fórmulas prontas, sem treinos genéricos.</p>
+  </div>
+  <div class="services-list">
+    <div class="svc reveal">
+      <div class="svc-num">01</div>
+      <span class="svc-icon">💪</span>
+      <div class="svc-name">TREINO PRESENCIAL</div>
+      <p class="svc-desc">Acompanhamento completo na academia. Execução supervisionada, correção postural em tempo real e periodização inteligente.</p>
+    </div>
+    <div class="svc reveal d1">
+      <div class="svc-num">02</div>
+      <span class="svc-icon">📱</span>
+      <div class="svc-name">CONSULTORIA ONLINE</div>
+      <p class="svc-desc">Planilha de treino exclusiva, vídeos de execução e suporte direto. Você treina onde quiser sem perder a qualidade.</p>
+    </div>
+    <div class="svc reveal d2">
+      <div class="svc-num">03</div>
+      <span class="svc-icon">🥗</span>
+      <div class="svc-name">PLANO NUTRICIONAL</div>
+      <p class="svc-desc">Orientação alimentar integrada ao treino. Sem dieta maluca — comer bem pra ter energia e resultado de verdade.</p>
+    </div>
+    <div class="svc reveal">
+      <div class="svc-num">04</div>
+      <span class="svc-icon">📊</span>
+      <div class="svc-name">AVALIAÇÃO FÍSICA</div>
+      <p class="svc-desc">Bioimpedância, medidas corporais e análise postural completa. Partimos de onde você está, chegamos onde você quer ir.</p>
+    </div>
+    <div class="svc reveal d1">
+      <div class="svc-num">05</div>
+      <span class="svc-icon">🏃</span>
+      <div class="svc-name">TREINO FUNCIONAL</div>
+      <p class="svc-desc">Força, equilíbrio, mobilidade e resistência que fazem diferença fora da academia também. Movimento real para vida real.</p>
+    </div>
+    <div class="svc reveal d2">
+      <div class="svc-num">06</div>
+      <span class="svc-icon">🎯</span>
+      <div class="svc-name">GRUPO REDUZIDO</div>
+      <p class="svc-desc">Até 4 pessoas por turma. Energia de grupo com atenção individual. A combinação perfeita de resultado e custo-benefício.</p>
+    </div>
+  </div>
+</section>
+
+<!-- RESULTS -->
+<section class="s results" id="results">
+  <div class="s-label">Números reais</div>
+  <div class="results-grid">
+    <div class="results-numbers">
+      <div class="result-row reveal">
+        <div class="result-val">−14kg</div>
+        <div class="result-info">
+          <strong>PERDA DE PESO MÉDIA</strong>
+          <p>Alunos com foco em emagrecimento alcançaram em média −14kg em 4 meses de protocolo contínuo.</p>
+        </div>
+      </div>
+      <div class="result-row reveal d1">
+        <div class="result-val">+8kg</div>
+        <div class="result-info">
+          <strong>GANHO DE MASSA</strong>
+          <p>Hipertrofia consistente com periodização avançada. Sem truques — só treino, nutrição e consistência.</p>
+        </div>
+      </div>
+      <div class="result-row reveal d2">
+        <div class="result-val">97%</div>
+        <div class="result-info">
+          <strong>SATISFAÇÃO DOS ALUNOS</strong>
+          <p>Quase todos renovam e indicam. Não porque são obrigados — porque os resultados aparecem.</p>
+        </div>
+      </div>
+      <div class="result-row reveal d3">
+        <div class="result-val">450+</div>
+        <div class="result-info">
+          <strong>TRANSFORMAÇÕES</strong>
+          <p>Histórias reais de pessoas reais que decidiram mudar. Cada número é uma vida diferente.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="method-card reveal d1">
+      <div class="s-label" style="margin-bottom:1.8rem;">Método APEX</div>
+      <p style="font-size:0.85rem;line-height:1.8;color:var(--muted);margin-bottom:1.8rem;">Não existe atalho. Existe um método — avaliação honesta, protocolo específico, execução assistida e ajuste contínuo.</p>
+      <div>
+        <div class="method-step">
+          <div class="step-n">1</div>
+          <div class="step-text">
+            <strong>AVALIAÇÃO</strong>
+            <p>Entendemos seu corpo, seu histórico e seus objetivos reais.</p>
+          </div>
+        </div>
+        <div class="method-step">
+          <div class="step-n">2</div>
+          <div class="step-text">
+            <strong>PROTOCOLO</strong>
+            <p>Criamos um plano exclusivo com base nos dados coletados.</p>
+          </div>
+        </div>
+        <div class="method-step">
+          <div class="step-n">3</div>
+          <div class="step-text">
+            <strong>EXECUÇÃO</strong>
+            <p>Treinamos juntos com acompanhamento técnico total.</p>
+          </div>
+        </div>
+        <div class="method-step">
+          <div class="step-n">4</div>
+          <div class="step-text">
+            <strong>EVOLUÇÃO</strong>
+            <p>Ajustamos periodicamente para você nunca estagnar.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="s testimonials" id="testimonials">
+  <div class="s-label">Depoimentos</div>
+  <h2 class="testimonials-title reveal">
+    O QUE DIZEM<br>
+    OS <em>ALUNOS</em>
+  </h2>
+  <div class="testi-grid">
+    <div class="testi big reveal">
+      <div class="testi-quote">"</div>
+      <div class="stars">★★★★★</div>
+      <p class="testi-text">Em 3 meses perdi 11kg sem passar fome. Aprendi que treinar é sobre constância, não sobre se machucar todo dia. Mudou minha relação com o corpo.</p>
+      <div class="testi-author">
+        <div class="av av-paper">AM</div>
+        <div>
+          <div class="author-name" style="color:var(--paper)">Ana Melo</div>
+          <div class="author-meta">Emagrecimento · 3 meses</div>
+        </div>
+      </div>
+    </div>
+    <div class="testi reveal d1">
+      <div class="testi-quote">"</div>
+      <div class="stars">★★★★★</div>
+      <p class="testi-text">Tentei 4 academias antes. Nenhuma deu certo porque não tinha acompanhamento real. Em 5 meses ganhei 7kg de massa.</p>
+      <div class="testi-author">
+        <div class="av av-fire">RS</div>
+        <div>
+          <div class="author-name">Rafael Souza</div>
+          <div class="author-meta">Hipertrofia · 5 meses</div>
+        </div>
+      </div>
+    </div>
+    <div class="testi reveal d2">
+      <div class="testi-quote">"</div>
+      <div class="stars">★★★★★</div>
+      <p class="testi-text">Treino online e me sinto mais acompanhada do que em qualquer academia. O suporte é rápido, o treino faz sentido e os resultados vieram logo.</p>
+      <div class="testi-author">
+        <div class="av av-gold">JL</div>
+        <div>
+          <div class="author-name">Julia Lima</div>
+          <div class="author-meta">Online · 2 meses</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PLANS -->
+<section class="s plans" id="plans">
+  <div class="s-label">Investimento</div>
+  <div class="plans-header">
+    <h2 class="plans-title reveal">
+      ESCOLHA<br>
+      <em>seu plano</em>
+    </h2>
+    <p class="plans-note reveal">Todos os planos incluem avaliação inicial gratuita. Sem fidelidade — renove se fizer sentido.</p>
+  </div>
+  <div class="plans-grid">
+    <div class="plan reveal">
+      <div class="plan-tier">Online</div>
+      <div class="plan-price"><sup>R$</sup>297</div>
+      <div class="plan-cycle">por mês · cobrado mensalmente</div>
+      <hr class="plan-divider">
+      <ul class="plan-features">
+        <li>Planilha de treino personalizada</li>
+        <li>Suporte via WhatsApp</li>
+        <li>Vídeos de execução</li>
+        <li>Reavaliação mensal</li>
+        <li>Acesso ao app de treino</li>
+      </ul>
+      <button class="btn-plan-ghost">Começar agora</button>
+    </div>
+    <div class="plan hot reveal d1">
+      <div class="plan-tier">Presencial</div>
+      <div class="plan-price"><sup>R$</sup>597</div>
+      <div class="plan-cycle">por mês · 8 sessões incluídas</div>
+      <hr class="plan-divider">
+      <ul class="plan-features">
+        <li>2× por semana com o personal</li>
+        <li>Avaliação física completa</li>
+        <li>Plano nutricional básico</li>
+        <li>Suporte ilimitado</li>
+        <li>Planilha complementar</li>
+        <li>Reavaliação quinzenal</li>
+      </ul>
+      <button class="btn-plan-fire">Quero este plano</button>
+    </div>
+    <div class="plan reveal d2">
+      <div class="plan-tier">Premium</div>
+      <div class="plan-price"><sup>R$</sup>997</div>
+      <div class="plan-cycle">por mês · 12 sessões incluídas</div>
+      <hr class="plan-divider">
+      <ul class="plan-features">
+        <li>3× por semana presencial</li>
+        <li>Plano nutricional completo</li>
+        <li>Acompanhamento diário</li>
+        <li>Suporte prioritário 24h</li>
+        <li>Bioimpedância mensal</li>
+        <li>Acesso a grupo VIP exclusivo</li>
+      </ul>
+      <button class="btn-plan-ghost">Começar agora</button>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <h2 class="cta-title reveal">
+    PRONTO<br>
+    PRA <em>MUDAR</em><br>
+    <span class="outline">TUDO?</span>
+  </h2>
+  <div class="cta-right reveal d1">
+    <p class="cta-sub">Não existe momento certo. O momento é agora. Vem conversar sem compromisso — a primeira avaliação é gratuita.</p>
+    <button class="btn-fire">Falar no WhatsApp →</button>
+    <button class="btn-outline">Agendar avaliação gratuita</button>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">AP<em>E</em>X</div>
+  <p>© 2025 Apex Personal Training · Carlos Mendes · CREF 012345-G/SP</p>
+  <p>São Paulo, SP</p>
+</footer>
+
+<script>
+// CURSOR
+const cursor = document.getElementById('cursor');
+const ring = document.getElementById('ring');
+let mx = 0, my = 0, rx = 0, ry = 0;
+
+document.addEventListener('mousemove', e => {
+  mx = e.clientX; my = e.clientY;
+  cursor.style.left = mx + 'px';
+  cursor.style.top = my + 'px';
+});
+
+function animRing() {
+  rx += (mx - rx) * 0.1;
+  ry += (my - ry) * 0.1;
+  ring.style.left = rx + 'px';
+  ring.style.top = ry + 'px';
+  requestAnimationFrame(animRing);
+}
+animRing();
+
+document.querySelectorAll('button, a').forEach(el => {
+  el.addEventListener('mouseenter', () => {
+    cursor.style.width = '20px';
+    cursor.style.height = '20px';
+    ring.style.width = '52px';
+    ring.style.height = '52px';
+  });
+  el.addEventListener('mouseleave', () => {
+    cursor.style.width = '12px';
+    cursor.style.height = '12px';
+    ring.style.width = '36px';
+    ring.style.height = '36px';
+  });
+});
+
+// COUNTERS
+function counter(el, target, suffix, dur) {
+  let v = 0;
+  const step = target / (dur / 16);
+  const t = setInterval(() => {
+    v = Math.min(v + step, target);
+    el.innerHTML = Math.floor(v) + '<span>' + suffix + '</span>';
+    if (v >= target) clearInterval(t);
+  }, 16);
+}
+
+setTimeout(() => {
+  counter(document.getElementById('sn1'), 200, '+', 1400);
+  counter(document.getElementById('sn2'), 8, '+', 900);
+  counter(document.getElementById('sn3'), 97, '%', 1200);
+  const el4 = document.getElementById('sn4');
+  let v = 0;
+  const t = setInterval(() => {
+    v = Math.min(v + 450/87, 450);
+    el4.textContent = Math.floor(v);
+    if (v >= 450) clearInterval(t);
+  }, 16);
+}, 500);
+
+// SCROLL REVEAL
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) { e.target.classList.add('in'); obs.unobserve(e.target); }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+</script>
+</body>
+</html>
